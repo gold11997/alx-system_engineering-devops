@@ -1,0 +1,10 @@
+sh_config
+#Disable password authentication
+
+Host *
+    PasswordAuthentication no
+    IdentityFile ~/.ssh/school
+    SendEnv LANG LC_*
+    HashKnownHosts yes
+    HostName 54.86.164.59
+    User ubuntu

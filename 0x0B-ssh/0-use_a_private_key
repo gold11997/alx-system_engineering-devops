@@ -1,0 +1,2 @@
+onnect to your server
+ssh -i ~/.ssh/school ubuntu@54.86.164.59
