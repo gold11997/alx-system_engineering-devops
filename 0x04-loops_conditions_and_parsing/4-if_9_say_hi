@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
-# This script is displaying "Holberton School" 10 times, but for the 9th iteration, displays Holberton School and then Hi on a new line
-x=1
-while [ $x -le 10 ]
-do
-     if [ $x -eq 9 ]
-     then
-             echo "Best School"
-             echo "Hi"
-     else
-             echo "Best School"
-     fi
-x=$((x + 1))
+# a Bash script that displays Best School 10 times, but for the 9th iteration, displays Best School and then Hi on a new line.
+count=0
+while [ $count -lt 10 ]
+do 
+if [ $count -eq 9 ]
+then
+echo "Hi"
+fi
+echo "Best School"
+((count++))
 done
