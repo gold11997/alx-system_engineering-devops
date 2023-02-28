@@ -1,47 +1,28 @@
-ecurse it! """
-from requests import get
+#!/usr/bin/python3
+""" Queries the Reddit API and returns
+a list containing the titles of all hot articles for a given subreddit."""
 
-REDDIT = "https://www.reddit.com/"
-HEADERS = {'user-agent': 'my-app/0.0.1'}
+import requests
 
 
 def recurse(subreddit, hot_list=[], after=""):
-    """
-    Returns a list containing the titles of all hot articles for a given
-    subreddit. If no results are found for the given subreddit, the function
-    should return None.
-    """
-    if after is None:
-        return hot_list
+    """ Queries the Reddit API """
+    req = requests.get(
+        "https://www.reddit.com/r/{}/hot.json".format(subreddit),
+        headers={"User-Agent": "Custom"},
+        params={"after": after},
+    )
 
-    url = REDDIT + "r/{}/hot/.json".format(subreddit)
+    if req.status_code == 200:
+        for get_data in req.json().get("data").get("children"):
+            dat = get_data.get("data")
+            title = dat.get("title")
+            hot_list.append(title)
+        after = req.json().get("data").get("after")
 
-    params = {
-        'limit': 100,
-        'after': after
-    }
-
-    r = get(url, headers=HEADERS, params=params, allow_redirects=False)
-
-    if r.status_code != 200:
+        if after is None:
+            return hot_list
+        else:
+            return recurse(subreddit, hot_list, after)
+    else:
         return None
-
-    try:
-        js = r.json()
-
-    except ValueError:
-        return None
-
-    try:
-
-        data = js.get("data")
-        after = data.get("after")
-        children = data.get("children")
-        for child in children:
-            post = child.get("data")
-            hot_list.append(post.get("title"))
-
-    except:
-        return None
-
-    return recurse(subreddit, hot_list, after)
