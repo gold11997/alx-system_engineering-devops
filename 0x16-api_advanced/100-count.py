@@ -2,53 +2,43 @@
 """Function to count words in all hot posts of a given Reddit subreddit."""
 import requests
 
+def count_words(subreddit, word_list):
 
-def count_words(subreddit, word_list, instances={}, after="", count=0):
-    """Prints counts of given words found in hot posts of a given subreddit.
-    Args:
-        subreddit (str): The subreddit to search.
-        word_list (list): The list of words to search for in post titles.
-        instances (obj): Key/value pairs of words/counts.
-        after (str): The parameter for the next page of the API results.
-        count (int): The parameter of results matched thus far.
-    """
-    url = "https://www.reddit.com/r/{}/hot/.json".format(subreddit)
-    headers = {
-        "User-Agent": "linux:0x16.api.advanced:v1.0.0 (by /u/bdov_)"
-    }
-    params = {
-        "after": after,
-        "count": count,
-        "limit": 100
-    }
-    response = requests.get(url, headers=headers, params=params,
-                            allow_redirects=False)
-    try:
-        results = response.json()
-        if response.status_code == 404:
-            raise Exception
-    except Exception:
-        print("")
-        return
-
-    results = results.get("data")
-    after = results.get("after")
-    count += results.get("dist")
-    for c in results.get("children"):
-        title = c.get("data").get("title").lower().split()
-        for word in word_list:
-            if word.lower() in title:
-                times = len([t for t in title if t == word.lower()])
-                if instances.get(word) is None:
-                    instances[word] = times
-                else:
-                    instances[word] += times
-
-    if after is None:
-        if len(instances) == 0:
-            print("")
-            return
-        instances = sorted(instances.items(), key=lambda kv: (-kv[1], kv[0]))
-        [print("{}: {}".format(k, v)) for k, v in instances]
-    else:
-        count_words(subreddit, word_list, instances, after, count)
+    # Set up necessary variables
+    import requests
+    import json
+    from collections import Counter
+    result_count = Counter()
+    after = None
+    
+    # Create a request to the Reddit API to get the hot posts from the specified subreddit
+    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
+    params = {'limit': 100}
+    if after:
+        params['after'] = after
+    res = requests.get(url, params=params, headers={'User-agent': 'Mozilla/5.0'})
+    
+    # If the subreddit is invalid, return nothing
+    if res.status_code == 200:
+        json_data = json.loads(res.content)
+        children = json_data['data']['children']
+        after = json_data['data']['after']
+        
+        # Loop through each post in the response
+        for post in children:
+            title = post['data']['title'].lower()
+            title_words = title.split()
+            
+            # Iterate through word_list to find matching words
+            for word in word_list:
+                word_count = title_words.count(word.lower())
+                result_count[word.lower()] += word_count
+                
+        # Make a recursive call with the after parameter if there are more posts
+        if after:
+            count_words(subreddit, word_list)
+            
+    # Print the results in descending order
+    for word in sorted(result_count, key=result_count.get, reverse=True):
+        if result_count[word] > 0:
+            print('{}: {}'.format(word, result_count[word]))
