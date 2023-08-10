@@ -1,20 +1,23 @@
 #!/usr/bin/env bash
-# This script configures the nginx server to redirect /redirect_me to another page.
+# Script that installs Nginx server and redirects /redirect_me
 
-# Update package list and install nginx
-sudo apt update
-sudo apt install nginx -y
+sudo apt-get update
+sudo apt-get install -y nginx
+sudo ufw allow 'Nginx HTTP'
+echo "Hello World!" | sudo tee /var/www/html/index.html
+# OR
+# echo "Hello World!" > index.html
+# sudo mv index.html /var/www/html
 
-# Allow SSH and HTTP traffic through firewall
-sudo ufw allow 22
-sudo ufw allow 80
-sudo ufw enable
+echo "server {
+	listen 80 default_server;
+        listen [::]:80 default_server;
+        root /var/www/html;
+        index index.html;
+        location /redirect_me {
+                return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+        }
+}" > default
 
-# Create a basic HTML file
-echo 'Hello World!' | sudo tee /var/www/html/index.nginx-debian.html > /dev/null
-
-# Add redirection rule to nginx configuration
-sudo sed -i '\#listen 80 default_server#a rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
-
-# Restart nginx service
+sudo mv -f default /etc/nginx/sites-available/default
 sudo service nginx restart
