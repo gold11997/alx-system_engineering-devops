@@ -10,14 +10,24 @@ apt-get -y install haproxy
 # edit config file
 server_config=\
 "
-frontend  ben-frontend
-        bind *:80
-        mode http
-        default_backend ben-backend
-backend yonas-backend
-        balance roundrobin
-        server 69833-web-01 100.25.24.115:80 check
-        server 69833-web-02 100.25.37.86:80 check
+frontend ben
+   bind *:80
+   mode http
+   stats uri /haproxy?stats
+   default_backend web-servers
+
+backend web-servers
+    balance roundrobin
+    server 69833-web1 54.174.86.94:80 check
+    server 69833-web2 54.144.222.117:80 check
+
+listen stats
+   bind *:8080
+   stats enable
+   stats uri /
+   stats refresh 5s
+   stats realm Haproxy\ Statistics
+   #stats auth ben:P@ss123-(Not neccessary)     #Login User and Password for the monitoring
 "
 echo "$server_config" | sudo tee -a /etc/haproxy/haproxy.cfg
 
