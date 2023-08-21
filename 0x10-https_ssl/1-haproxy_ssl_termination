@@ -35,7 +35,6 @@ defaults
 
 frontend ben
 	bind *:80
-	bind *:443 ssl crt /etc/haproxy/certs/www.merab.tech.pem
 	redirect scheme https if !{ ssl_fc }
   	stats uri /haproxy?stats
 	default_backend web-servers
