@@ -33,12 +33,14 @@ defaults
 	errorfile 503 /etc/haproxy/errors/503.http
 	errorfile 504 /etc/haproxy/errors/504.http
 
-frontend merab
+frontend ben
 	bind *:80
 	bind *:443 ssl crt /etc/haproxy/certs/www.merab.tech.pem
+	redirect scheme https if !{ ssl_fc }
+  	stats uri /haproxy?stats
 	default_backend web-servers
 
 backend web-servers
 	balance roundrobin
-	server web-01 54.86.164.59:80 check
-	server web-02 100.25.168.151:80 check	
+	server 69833-web-01 54.174.86.94:80 check
+	server 69833-web-02 54.144.222.117:80 check	
